@@ -1,7 +1,7 @@
 package com.linkedin.metadata.builders.graph.relationship;
 
 import com.linkedin.common.urn.Urn;
-import com.linkedin.dataset.FineGrainFieldUpstream;
+import com.linkedin.dataset.FineGrainUpstreamFieldMapping;
 import com.linkedin.dataset.FineGrainUpstream;
 import com.linkedin.dataset.FineGrainUpstreamLineage;
 import com.linkedin.metadata.builders.graph.GraphBuilder;
@@ -30,11 +30,11 @@ public class DerivedByBuilderFromFineGrainUpstreamLineage extends BaseRelationsh
     List<DerivedBy> list = new ArrayList();
 
     for (FineGrainUpstream stream: upstreamLineage.getUpstreams()) {
-      for (FineGrainFieldUpstream fieldUpStream: stream.getFields()) {
+      for (FineGrainUpstreamFieldMapping upstreamFieldMapping: stream.getFields()) {
         try {
           list.add(new DerivedBy()
-              .setSource(Urn.createFromString(stream.getDataset().toString() + ":" + fieldUpStream.getSourceField()))
-              .setDestination(Urn.createFromString(urn.toString() + ":" + fieldUpStream.getDestinationField())));
+              .setSource(Urn.createFromString(stream.getDataset().toString() + ":" + upstreamFieldMapping.getSourceField().getFieldPath()))
+              .setDestination(Urn.createFromString(urn.toString() + ":" + upstreamFieldMapping.getDestinationField().getFieldPath())));
         } catch (URISyntaxException e) {
           return null;
         }

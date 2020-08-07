@@ -21,6 +21,6 @@ record FineGrainUpstream {
   /**
    * The source and target column mapping
    */
-  fields: array[FineGrainFieldUpstream]
+  fields: array[FineGrainUpstreamFieldMapping]
 
 }
