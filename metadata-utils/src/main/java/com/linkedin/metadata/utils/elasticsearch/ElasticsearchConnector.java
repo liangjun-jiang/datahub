@@ -3,6 +3,10 @@ package com.linkedin.metadata.utils.elasticsearch;
 import com.linkedin.events.metadata.ChangeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -24,7 +28,7 @@ import java.util.List;
 @Slf4j
 public class ElasticsearchConnector {
 
-  private RestClient _restClient;
+  private RestClientBuilder _restClientBuilder;
   private RestHighLevelClient _client;
 
   private Integer _esPort;
@@ -52,8 +56,8 @@ public class ElasticsearchConnector {
 
   private void initClient() {
     try {
-      _restClient = loadRestHttpClient(_esHosts, _esPort, _threadCount);
-      _client = new RestHighLevelClient(_restClient);
+      _restClientBuilder = loadRestHttpClientBuilder(_esHosts, _esPort, _threadCount, "", "");
+      _client = new RestHighLevelClient(_restClientBuilder);
     } catch (Exception ex) {
       log.error("Error: RestClient is not properly initialized. " + ex.toString());
     }
@@ -69,7 +73,7 @@ public class ElasticsearchConnector {
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
         log.info("Successfully feeded bulk request. Number of events: " + response.getItems().length + " Took time ms: "
-            + response.getTookInMillis());
+            + response.getIngestTookInMillis());
       }
 
       @Override
@@ -79,8 +83,9 @@ public class ElasticsearchConnector {
     };
 
     ThreadPool threadPool = new ThreadPool(Settings.builder().put(Settings.EMPTY).build());
+
     _bulkProcessor =
-        new BulkProcessor.Builder(_client::bulkAsync, listener, threadPool).setBulkActions(_bulkRequestsLimit)
+        BulkProcessor.builder((request, bulkListener) -> _client.bulkAsync(request, bulkListener), listener).setBulkActions(_bulkRequestsLimit)
             .setFlushInterval(TimeValue.timeValueSeconds(_bulkFlushPeriod))
             .setBackoffPolicy(BackoffPolicy.constantBackoff(TimeValue.timeValueSeconds(DEFAULT_RETRY_INTERVAL),
                 DEFAULT_NUMBER_OF_RETRIES))
@@ -115,12 +120,15 @@ public class ElasticsearchConnector {
   }
 
   @Nonnull
-  private static RestClient loadRestHttpClient(String[] hosts, Integer port, int threadCount) {
+  private static RestClientBuilder loadRestHttpClientBuilder(String[] hosts, Integer port, int threadCount, String user, String password) {
 
     HttpHost[] httpHosts = new HttpHost[hosts.length];
     for (int h = 0; h < hosts.length; h++) {
       httpHosts[h] = new HttpHost(hosts[h], port, "http");
     }
+
+    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+    credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
 
     RestClientBuilder builder = RestClient.builder(httpHosts).setHttpClientConfigCallback(httpAsyncClientBuilder -> httpAsyncClientBuilder
         // Configure number of threads for clients
@@ -128,7 +136,9 @@ public class ElasticsearchConnector {
 
     // TODO: Configure timeouts
     builder.setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setConnectionRequestTimeout(0));
+    builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
 
-    return builder.build();
+    return builder;
   }
+
 }

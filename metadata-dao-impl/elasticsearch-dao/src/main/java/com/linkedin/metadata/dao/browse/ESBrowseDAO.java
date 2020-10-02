@@ -32,9 +32,10 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.support.IncludeExclude;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -94,7 +95,7 @@ public class ESBrowseDAO extends BaseBrowseDAO {
     return AggregationBuilders.terms("groups")
         .field(_config.getBrowsePathFieldName())
         .size(Integer.MAX_VALUE)
-        .order(Terms.Order.term(true)) // Ascending order
+        .order(BucketOrder.key(true)) // Ascending order
         .includeExclude(new IncludeExclude(includeFilter, excludeFilter));
   }
 

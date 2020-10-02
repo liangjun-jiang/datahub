@@ -44,7 +44,7 @@ public class ESSearchDAOTest {
   @BeforeMethod
   public void setup() throws Exception {
     _testSearchConfig = new TestSearchConfig();
-    _searchDAO = new ESSearchDAO(null, EntityDocument.class, _testSearchConfig);
+    _searchDAO = new ESSearchDAO(null, EntityDocument.class, _testSearchConfig, null);
     _esAutoCompleteQuery = new ESAutoCompleteQueryForHighCardinalityFields(_testSearchConfig);
   }
 
@@ -124,7 +124,8 @@ public class ESSearchDAOTest {
     // Test: urn field does not exist in one search document, exists in another
     SearchHits searchHits3 = mock(SearchHits.class);
     SearchHit hit3 = mock(SearchHit.class);
-    when(hit3.getField("urn")).thenReturn(null);
+    when(hit3.getFields().get("urn")).thenReturn(null);
+//    when(hit3.getField("urn")).thenReturn(null);
     SearchHit hit4 = makeSearchHit(1);
     when(searchHits3.getHits()).thenReturn(new SearchHit[]{hit3, hit4});
     SearchResponse searchResponse3 = mock(SearchResponse.class);
@@ -202,7 +203,7 @@ public class ESSearchDAOTest {
     sourceMap.put("urn", makeUrn(id).toString());
     sourceMap.put("name", "test" + id);
     when(hit.getSourceAsMap()).thenReturn(sourceMap);
-    when(hit.getSource()).thenReturn(sourceMap);
+    when(hit.getSourceAsMap()).thenReturn(sourceMap);
     return hit;
   }
 

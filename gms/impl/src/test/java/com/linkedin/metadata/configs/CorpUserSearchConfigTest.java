@@ -27,7 +27,7 @@ public class CorpUserSearchConfigTest {
   @BeforeMethod
   public void setup() throws Exception {
     _corpUserInfoSearchConfig = new CorpUserSearchConfig();
-    _corpUserInfoSearchDAO = new ESSearchDAO(null, CorpUserInfoDocument.class, _corpUserInfoSearchConfig);
+    _corpUserInfoSearchDAO = new ESSearchDAO(null, CorpUserInfoDocument.class, _corpUserInfoSearchConfig, null);
     String esSearchResponseString =   loadJsonFromResource("corpUserESAutocompleteResponse.json");
     _autoCompleteResponse = ESTestUtils.getSearchResponseFromJSON(esSearchResponseString);
   }

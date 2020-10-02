@@ -4,6 +4,10 @@ import javax.annotation.Nonnull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -29,18 +33,26 @@ public class RestHighLevelClientFactory {
   @Value("${ELASTICSEARCH_CONNECTION_REQUEST_TIMEOUT:0}")
   private Integer elasticSearchConectionRequestTimeout;
 
+  @Value("${ELASTICSEARCH_USERNAME:1}")
+  private String elasticSearchUser;
+
+  @Value("${ELASTICSEARCH_PASSWORD:1}")
+  private String elasticSearchPassword;
+
   @Bean(name = "elasticSearchRestHighLevelClient")
   @Nonnull
   protected RestHighLevelClient createInstance() {
     try {
-      RestClient restClient = loadRestHttpClient(
+      RestClientBuilder restClientBuilder = loadRestHttpClientBuilder(
               elasticSearchHost,
               elasticSearchPort,
               elasticSearchThreadCount,
-              elasticSearchConectionRequestTimeout
+              elasticSearchConectionRequestTimeout,
+          "",
+          ""
       );
 
-      return new RestHighLevelClient(restClient);
+      return new RestHighLevelClient(restClientBuilder);
     } catch (Exception e) {
       throw new RuntimeException("Error: RestClient is not properly initialized. " + e.toString());
     }
@@ -58,6 +70,23 @@ public class RestHighLevelClientFactory {
             setConnectionRequestTimeout(connectionRequestTimeout));
 
     return builder.build();
+  }
+
+  @Nonnull
+  private static RestClientBuilder loadRestHttpClientBuilder(@Nonnull String host, int port, int threadCount,
+      int connectionRequestTimeout, String user, String password) throws Exception {
+    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+    credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
+    RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, "http"))
+        .setHttpClientConfigCallback(httpAsyncClientBuilder ->
+            httpAsyncClientBuilder.setDefaultIOReactorConfig(IOReactorConfig.custom()
+                .setIoThreadCount(threadCount).build()));
+
+    builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+    builder.setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.
+        setConnectionRequestTimeout(connectionRequestTimeout));
+
+    return builder;
   }
 }
 

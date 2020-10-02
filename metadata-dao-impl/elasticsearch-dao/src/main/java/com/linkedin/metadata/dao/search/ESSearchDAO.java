@@ -1,5 +1,6 @@
 package com.linkedin.metadata.dao.search;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.linkedin.common.UrnArray;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.data.DataList;
@@ -18,6 +19,7 @@ import com.linkedin.metadata.query.Criterion;
 import com.linkedin.metadata.query.Filter;
 import com.linkedin.metadata.query.SearchResultMetadata;
 import com.linkedin.metadata.query.SortCriterion;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,9 +32,13 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -57,21 +63,32 @@ public class ESSearchDAO<DOCUMENT extends RecordTemplate> extends BaseSearchDAO<
 
   private static final Integer DEFAULT_TERM_BUCKETS_SIZE_100 = 100;
   private static final String URN_FIELD = "urn";
+  private static final String TYPE = "type";
 
   private RestHighLevelClient _client;
   private BaseSearchConfig<DOCUMENT> _config;
   private BaseESAutoCompleteQuery _autoCompleteQueryForLowCardFields;
   private BaseESAutoCompleteQuery _autoCompleteQueryForHighCardFields;
+  private JsonNode _indexingJsonNode;
 
   // TODO: Currently takes elastic search client, in future, can take other clients such as galene
   // TODO: take params and settings needed to create the client
   public ESSearchDAO(@Nonnull RestHighLevelClient esClient, @Nonnull Class<DOCUMENT> documentClass,
-      @Nonnull BaseSearchConfig<DOCUMENT> config) {
+      @Nonnull BaseSearchConfig<DOCUMENT> config, @Nonnull JsonNode indexingJsonNode) throws IOException {
     super(documentClass);
     _client = esClient;
     _config = config;
+    _indexingJsonNode = indexingJsonNode;
     _autoCompleteQueryForLowCardFields = new ESAutoCompleteQueryForLowCardinalityFields(_config);
     _autoCompleteQueryForHighCardFields = new ESAutoCompleteQueryForHighCardinalityFields(_config);
+    try {
+      if (!isExistsIndex()) {
+        createIndex();
+      }
+    } catch (IOException e) {
+      log.error("create or query index failed:" + e.getLocalizedMessage());
+      throw e;
+    }
   }
 
   @Nonnull
@@ -80,6 +97,24 @@ public class ESSearchDAO<DOCUMENT extends RecordTemplate> extends BaseSearchDAO<
       return _autoCompleteQueryForLowCardFields;
     }
     return _autoCompleteQueryForHighCardFields;
+  }
+
+  @Nonnull
+  protected boolean isExistsIndex() throws IOException {
+    GetIndexRequest request = new GetIndexRequest();
+    request.indices(_config.getIndexName());
+    return _client.indices().exists(request);
+  }
+
+  boolean createIndex() throws IOException {
+    CreateIndexRequest request = new CreateIndexRequest(_config.getIndexName());
+    request.settings(_indexingJsonNode.path("settings").toString(), XContentType.JSON);
+    log.debug("indexing name: {}, setting: {}", _config.getIndexName(), _indexingJsonNode.path("settings").toString());
+    request.mapping(TYPE, _indexingJsonNode.path("mappings").toString(), XContentType.JSON);
+    log.debug("indexing name: {}, mappings: {}", _config.getIndexName(), _indexingJsonNode.path("mappings").toString());
+    CreateIndexResponse response = _client.indices().create(request);
+    log.debug("create {} index finished, isAcknowledged: {}", _config.getIndexName(), response.isAcknowledged());
+    return response.isAcknowledged();
   }
 
   /**

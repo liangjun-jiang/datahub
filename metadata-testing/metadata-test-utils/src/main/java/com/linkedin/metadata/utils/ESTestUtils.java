@@ -17,7 +17,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.ContextParser;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.search.SearchModule;
@@ -64,7 +63,7 @@ public final class ESTestUtils {
   private static SearchResponse getSearchResponsefromNamedContents(@Nonnull List<NamedXContentRegistry.Entry> contents,
       @Nonnull String response) throws Exception {
     NamedXContentRegistry registry = new NamedXContentRegistry(contents);
-    XContentParser parser = JsonXContent.jsonXContent.createParser(registry, response);
+    XContentParser parser = null; //JsonXContent.jsonXContent.createParser(registry, response);
     return SearchResponse.fromXContent(parser);
   }
 

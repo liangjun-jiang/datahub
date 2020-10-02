@@ -6,6 +6,7 @@ import com.linkedin.metadata.utils.ESTestUtils;
 import com.linkedin.metadata.dao.search.ESSearchDAO;
 import com.linkedin.metadata.dao.utils.QueryUtils;
 import com.linkedin.metadata.query.Filter;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +25,9 @@ public class CorpGroupSearchTest {
   private CorpGroupSearchConfig _corpGroupSearchConfig;
 
   @BeforeMethod
-  public void setup() {
+  public void setup() throws IOException {
     _corpGroupSearchConfig = new CorpGroupSearchConfig();
-    _corpGroupSearchDAO = new ESSearchDAO(null, CorpGroupDocument.class, _corpGroupSearchConfig);
+    _corpGroupSearchDAO = new ESSearchDAO(null, CorpGroupDocument.class, _corpGroupSearchConfig, null);
   }
 
   @Test
