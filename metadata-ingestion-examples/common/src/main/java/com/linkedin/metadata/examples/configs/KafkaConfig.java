@@ -4,7 +4,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import java.util.Arrays;
 import java.util.Map;
-import org.apache.avro.generic.IndexedRecord;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -16,14 +16,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class KafkaConfig {
-  @Value("${KAFKA_BOOTSTRAP_SERVER:localhost:29092}")
+  @Value("${KAFKA_BOOTSTRAP_SERVER:localhost:9092}")
   private String kafkaBootstrapServers;
 
   @Value("${KAFKA_SCHEMAREGISTRY_URL:http://localhost:8081}")
   private String kafkaSchemaRegistryUrl;
 
   @Bean(name = "kafkaEventProducer")
-  public Producer<String, IndexedRecord> kafkaListenerContainerFactory(KafkaProperties properties) {
+  public Producer<String, GenericRecord> kafkaProducerFactory(KafkaProperties properties) {
     KafkaProperties.Producer producerProps = properties.getProducer();
 
     producerProps.setKeySerializer(StringSerializer.class);

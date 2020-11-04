@@ -85,7 +85,7 @@ services:
       - schema-registry
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.8
+    image: elasticsearch:5.6.8
     env_file: elasticsearch/env/docker.env
     container_name: elasticsearch
     hostname: elasticsearch
@@ -95,7 +95,7 @@ services:
       - esdata:/usr/share/elasticsearch/data
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:5.6.8
+    image: kibana:5.6.8
     env_file: kibana/env/docker.env
     container_name: kibana
     hostname: kibana
@@ -105,7 +105,7 @@ services:
       - elasticsearch
 
   neo4j:
-    image: neo4j:3.5.7
+    image: neo4j:4.0.6
     env_file: neo4j/env/docker.env
     hostname: neo4j
     container_name: neo4j

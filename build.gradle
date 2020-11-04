@@ -1,5 +1,6 @@
 buildscript {
   ext.pegasusVersion = '28.3.7'
+  ext.gmaVersion = '0.1.0'
 
   apply from: './repositories.gradle'
   buildscript.repositories.addAll(project.repositories)
@@ -20,6 +21,7 @@ project.ext.spec = [
             'generator': 'com.linkedin.pegasus:generator:' + pegasusVersion,
             'restliCommon' : 'com.linkedin.pegasus:restli-common:' + pegasusVersion,
             'restliClient' : 'com.linkedin.pegasus:restli-client:' + pegasusVersion,
+            'restliDocgen' : 'com.linkedin.pegasus:restli-docgen:' + pegasusVersion,
             'restliServer' : 'com.linkedin.pegasus:restli-server:' + pegasusVersion,
             'restliSpringBridge': 'com.linkedin.pegasus:restli-spring-bridge:' + pegasusVersion,
         ]
@@ -27,6 +29,7 @@ project.ext.spec = [
 ]
 
 project.ext.externalDependency = [
+    'assertJ': 'org.assertj:assertj-core:3.11.1',
     'avro_1_7': 'org.apache.avro:avro:1.7.7',
     'avroCompiler_1_7': 'org.apache.avro:avro-compiler:1.7.7',
     'cacheApi' : 'javax.cache:cache-api:1.1.0',
@@ -37,6 +40,17 @@ project.ext.externalDependency = [
     'elasticSearchRest': 'org.elasticsearch.client:elasticsearch-rest-high-level-client:5.6.8',
     'elasticSearchTransport': 'org.elasticsearch.client:transport:5.6.8',
     'findbugsAnnotations': 'com.google.code.findbugs:annotations:3.0.1',
+    'gmaCoreModels': "com.linkedin.datahub-gma:core-models-data-template:$gmaVersion",
+    'gmaDaoApi': "com.linkedin.datahub-gma:dao-api:$gmaVersion",
+    'gmaDaoApiDataTemplate': "com.linkedin.datahub-gma:dao-api-data-template:$gmaVersion",
+    'gmaEbeanDao': "com.linkedin.datahub-gma:ebean-dao:$gmaVersion",
+    'gmaElasticsearchDao': "com.linkedin.datahub-gma:elasticsearch-dao:$gmaVersion",
+    'gmaNeo4jDao': "com.linkedin.datahub-gma:neo4j-dao:$gmaVersion",
+    'gmaRestliResources': "com.linkedin.datahub-gma:restli-resources:$gmaVersion",
+    'gmaRestliResourcesDataTemplate': "com.linkedin.datahub-gma:restli-resources-data-template:$gmaVersion",
+    'gmaTestModels': "com.linkedin.datahub-gma:test-models:$gmaVersion",
+    'gmaTestModelsDataTemplate': "com.linkedin.datahub-gma:test-models-data-template:$gmaVersion",
+    'gmaValidators': "com.linkedin.datahub-gma:validators:$gmaVersion",
     'guice': 'com.google.inject:guice:4.2.2',
     'guava': 'com.google.guava:guava:27.0.1-jre',
     'h2': 'com.h2database:h2:1.4.196',
@@ -51,7 +65,7 @@ project.ext.externalDependency = [
     'jsonSimple': 'com.googlecode.json-simple:json-simple:1.1.1',
     'junit': 'junit:junit:4.12',
     // avro-serde includes dependencies for `kafka-avro-serializer` `kafka-schema-registry-client` and `avro`
-    'kafkaAvroSerde': 'io.confluent:kafka-streams-avro-serde:5.2.2',
+    'kafkaAvroSerde': 'io.confluent:kafka-streams-avro-serde:5.5.1',
     'kafkaClients': 'org.apache.kafka:kafka-clients:2.3.0',
     'logbackClassic': 'ch.qos.logback:logback-classic:1.2.3',
     'lombok': 'org.projectlombok:lombok:1.18.12',
@@ -61,6 +75,7 @@ project.ext.externalDependency = [
     'neo4jHarness': 'org.neo4j.test:neo4j-harness:3.4.11',
     'neo4jJavaDriver': 'org.neo4j.driver:neo4j-java-driver:4.0.0',
     'parseqTest': 'com.linkedin.parseq:parseq:3.0.7:test',
+    'picocli': 'info.picocli:picocli:4.5.0',
     'playDocs': 'com.typesafe.play:play-docs_2.11:2.6.18',
     'playGuice': 'com.typesafe.play:play-guice_2.11:2.6.18',
     'playJavaJdbc': 'com.typesafe.play:play-java-jdbc_2.11:2.6.18',
@@ -82,6 +97,7 @@ project.ext.externalDependency = [
     'testng': 'org.testng:testng:6.9.9',
     'splineProducerModel':'za.co.absa.spline:producer-model:0.5.5',
     'jacksonModuleScala':'com.fasterxml.jackson.module:jackson-module-scala_2.12:2.11.3'
+    'zookeeper': 'org.apache.zookeeper:zookeeper:3.4.14'
 ]
 
 allprojects {

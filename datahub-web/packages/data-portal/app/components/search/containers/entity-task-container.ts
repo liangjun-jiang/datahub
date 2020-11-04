@@ -5,16 +5,14 @@ import {
 } from '@datahub/shared/types/tracking/event-tracking.d';
 import { TrackingEventCategory } from '@datahub/shared/constants/tracking/event-tracking/index';
 import Component from '@ember/component';
-import { set } from '@ember/object';
-import { computed } from '@ember/object';
-import { facetFromParamUrl, readSearchV2, facetToParamUrl } from 'datahub-web/utils/api/search/search';
+import { set, computed } from '@ember/object';
+import { facetFromParamUrl, facetToParamUrl } from '@datahub/shared/utils/search/search';
 import { IFacetsCounts, IFacetsSelectionsMap } from '@datahub/data-models/types/entity/facets';
 import { task } from 'ember-concurrency';
 import { debounce } from '@ember/runloop';
 import { IDataModelEntitySearchResult, ISearchDataWithMetadata } from '@datahub/data-models/types/entity/search';
 import { DataModelEntity, DataModelName, DataModelEntityInstance } from '@datahub/data-models/constants/entity';
 import { DatasetEntity } from '@datahub/data-models/entity/dataset/dataset-entity';
-import { ISearchEntityApiParams, IEntitySearchResult } from '@datahub/shared/types/search/entity';
 import { alias } from '@ember/object/computed';
 import { containerDataSource } from '@datahub/utils/api/data-source';
 import { inject as service } from '@ember/service';
@@ -30,8 +28,8 @@ import CurrentUser from '@datahub/shared/services/current-user';
 import { PageKey, CustomTrackingEventName } from '@datahub/shared/constants/tracking/event-tracking';
 import { ISearchResultImpressionTrackEventParams } from '@datahub/shared/types/tracking/event-tracking';
 import {
+  getResultsForEntity,
   searchResultItemIndex,
-  searchResultMetasToFacetCounts,
   withResultMetadata
 } from '@datahub/shared/utils/search/search-results';
 import { assertComponentPropertyNotUndefined } from '@datahub/utils/decorators/assert';
@@ -216,49 +214,23 @@ export default class SearchEntityTaskContainer extends Component {
   /**
    * Will perform a search for any type of entity (except datasets at the moment)
    */
-  async getResultsForEntity(
+  getResultsForEntity(
     entity: DataModelName,
     searchConfig: SearchEntityTaskContainer['searchConfig']
   ): Promise<IDataModelEntitySearchResult<DataModelEntityInstance> | undefined> {
-    const { keyword = '', page = 1, facetsApiParams, pageSize, dataModels } = this;
     const forcedFacets = getFacetForcedValueForEntity(searchConfig.attributes);
-    const mergedFacetsApiParams: Record<string, Array<string>> = { ...facetsApiParams, ...forcedFacets };
-    const searchApiParams: ISearchEntityApiParams = {
-      facets: mergedFacetsApiParams,
-      input: keyword,
-      type: dataModels.getModel(entity).renderProps.apiEntityName,
-      start: (page - 1) * pageSize,
-      count: pageSize
-    };
 
-    const searchResultProxy: IEntitySearchResult<DataModelEntityInstance['entity']> = await readSearchV2<
-      DataModelEntityInstance['entity']
-    >(searchApiParams);
-    const { elements } = searchResultProxy;
-
-    if (elements) {
-      const { start, count, total } = searchResultProxy;
-      const itemsPerPage = count;
-      const totalPages = Math.ceil(total / itemsPerPage);
-      const page = Math.ceil((start + 1) / itemsPerPage);
-      const data = elements.map(
-        (entityData): DataModelEntityInstance => dataModels.createPartialInstance(entity, entityData)
-      );
-
-      const entitySearchResult = {
-        data,
-        count: total,
-        start,
-        itemsPerPage,
-        page,
-        totalPages,
-        facets: searchResultMetasToFacetCounts(searchResultProxy.searchResultMetadatas, facetsApiParams)
-      };
-
-      return entitySearchResult;
-    }
-
-    return;
+    return getResultsForEntity(
+      {
+        facetsApiParams: { ...this.facetsApiParams, ...forcedFacets },
+        keyword: this.keyword || '',
+        page: this.page || 1,
+        pageSize: this.pageSize,
+        aspects: searchConfig.defaultAspects
+      },
+      entity,
+      this.dataModels
+    );
   }
 
   /**
@@ -273,7 +245,6 @@ export default class SearchEntityTaskContainer extends Component {
       set(this, 'result', result);
       return;
     }
-
     // result is nullable, but null when there is an exception at the search endpoint
     throw new Error('Could not parse search results');
   }

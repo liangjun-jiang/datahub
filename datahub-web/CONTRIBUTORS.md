@@ -1,10 +1,8 @@
-DataHub Web Contributors
-=============================================
+# DataHub Web Contributors
 
 - Ignacio (Nacho) Bona Piedrabuena (2018)
 - Charlie (That Pikachu Guy) Tran (2017)
-- Ram (Raym) Anbalagan (2019)
-
+- Beau Davenport (2020)
 
 ## In loving memory
 
@@ -49,6 +47,29 @@ DataHub Web Contributors
           | |   \. _|_. | .  ||
           |                  ||
           |     Jacky Lei    ||
+          |    2019 - 2020   ||
+  *       | *   **    * **   |**      **
+   \))\\(///.,(//,,..,,\||(,,.,\\,.((//
+```
+
+```
+                  _  /)
+                 (\ / )
+                 |/)\)
+                  /\_
+                  \__|=
+                 (    )
+                 __)(__
+           _____/      \\_____
+          |  _     ___   _   ||
+          | | \     |   | \  ||
+          | |  |    |   |  | ||
+          | |_/     |   |_/  ||
+          | | \     |   |    ||
+          | |  \    |   |    ||
+          | |   \. _|_. | .  ||
+          |                  ||
+          |   Ram Anbalagan  ||
           |    2019 - 2020   ||
   *       | *   **    * **   |**      **
    \))\\(///.,(//,,..,,\||(,,.,\\,.((//
