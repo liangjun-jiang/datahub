@@ -32,6 +32,9 @@ dependencies {
 
     compile externalDependency.springActuator
 
+    compile externalDependency.splineProducerModel
+    compile externalDependency.jacksonModuleScala
+
     compileOnly externalDependency.lombok
 
     annotationProcessor externalDependency.lombok

@@ -79,7 +79,9 @@ project.ext.externalDependency = [
     'springBootStarterJetty': 'org.springframework.boot:spring-boot-starter-jetty:2.1.2.RELEASE',
     'springKafka': 'org.springframework.kafka:spring-kafka:2.2.14.RELEASE',
     'springActuator': 'org.springframework.boot:spring-boot-starter-actuator:2.1.2.RELEASE',
-    'testng': 'org.testng:testng:6.9.9'
+    'testng': 'org.testng:testng:6.9.9',
+    'splineProducerModel':'za.co.absa.spline:producer-model:0.5.5',
+    'jacksonModuleScala':'com.fasterxml.jackson.module:jackson-module-scala_2.12:2.11.3'
 ]
 
 allprojects {
